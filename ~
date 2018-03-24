@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use Illuminate\Http\Request;
+
+use App\Http\Requests;
+use App\Http\Controllers\Controller;
+use App\User;
+use App\Models\JobSeeker;
+use Hash;
+use Auth;
+use Validator;
+use App\Repositories\CompanyProfile\CompanyProfileRepository;
+use App\Repositories\JobSeeker\JobSeekerRepository;
+use Socialite;
+
+
+class UsersController extends ApiBaseController
+{
+    protected $user;
+    protected $companyProfile;
+    protected $jobSeeker;
+    public function __construct(User $user, CompanyProfileRepository $companyProfile,JobSeekerRepository $jobSeeker){
+        $this->user           = $user;
+        $this->companyProfile = $companyProfile;
+        $this->jobSeeker      = $jobSeeker;
+    }
+    public function postRegister(Request $request){
+        try {
+            $validator = Validator::make($request->all(), array(
+                'FullName' => 'required',
+                'Email' => 'required',
+                'PhoneNumber' => 'required',
+                'Password' => 'required',
+            ));
+            if($validator->fails()){
+                $res = array('error'=>$validator->messages()->all());
+                return $this->returnError(405,'Fail Validate!', $res);
+            }
+            $full_name = $request->FullName;
+            $email     = $request->Email;
+            $phone     = $request->PhoneNumber;
+            $pass      = $request->Password;
+            $iscompany = $request->input('IsCompany', 0);
+            $c_user = User::where('Email', $email)->first();
+            if($c_user){
+                return $this->returnError(406, 'Email already exists!');
+            }else{
+                $user           = new User;
+                $user->Email    = $email;
+                $user->IsCompany= $iscompany;
+                $user->Password = Hash::make($pass);
+		//dd($user);
+                if($user->save()){
+                        $jobseeker              = new JobSeeker;
+                        $jobseeker->user_id     = $user->id;
+                        $jobseeker->FullName    = $full_name;
+                        $jobseeker->PhoneNumber = $phone;
+                        $jobseeker->save();
+                    return $this->returnSuccess('Register Success!');
+                }else{
+                    return $this->returnError(404, 'Register Failse!');
+                }
+            }
+        } catch (Exception $e) {
+            return $this->returnError(502, 'Bad Gateway');
+        }
+    }
+
+    public function postLogin(Request $request) {
+        $remember = false;
+        if($request->Check == 1) {
+            $remember = true;
+        }
+        if(Auth::attempt(['Email' => $request->Email, 'password' => $request->Password], $remember) OR Auth::attempt(['Username' => $request->email, 'password' => $request->password], $remember)) {
+            return $this->returnJSON(200, 'Login success!', Auth::user());
+        }else{
+            return $this->returnError(404, 'Login Failse!');
+        }
+    }
+
+    // login postLoginSocialite
+
+    // public function postRegisterSocialite(Request $request){
+    //     try{
+    //         $validator = Validator::make($request->all(), array(
+    //             'FullName' => 'required',
+    //             'Email' => 'required',
+    //             'Avatar' => 'required',
+    //             'FbID' => 'required',
+    //         ));
+    //         if($validator->fails()){
+    //             $res = array('error'=>$validator->messages()->all());
+    //             return $this->returnError(405,'Fail Validate!', $res);
+    //         }
+
+    //         $user = User::where('Email', $request->Email)->first();
+    //         if($user){
+    //             $user->fb_id = $request->FbID;
+    //             $jobseeker = JobSeeker::where('user_id', $user->id)->first();
+    //             if(!$jobseeker){
+    //                 $jobseeker = new JobSeeker();
+    //             }
+    //         }else{
+    //             $user = new User();
+    //             $user->Email = $request->Email;
+    //             $user->fb_id = $request->FbID;
+    //             $jobseeker = new JobSeeker();
+    //         }
+    //         if($user->save()){
+    //             $jobseeker->user_id = $user->id;
+    //             $jobseeker->Avatar = $request->Avatar;
+    //             $jobseeker->FullName = $request->FullName;
+    //             $jobseeker->IsActive = 1;
+    //             $jobseeker->save();
+    //             return $this->returnSuccess('Regiter Success!');
+    //         }else{
+    //             return $this->returnError(404, 'Register Failse!');
+    //         }
+    //     } catch (Exception $e) {
+    //         return $this->returnError(502, 'Bad Gateway');
+    //     }
+
+    // }
+
+    public function postRegisterSocialite(Request $request) {
+        $user = User::where('fb_id', $request->FB_id)->first();
+        if($user) {
+            Auth::login($user);
+            return $this->returnJSON(200, 'Login success !', Auth::user());
+        }else{
+            $validator = Validator::make($request->all(), array(
+                'FullName' => 'required',
+                'Email' => 'required',
+                'Avatar' => 'required',
+                'FB_id' => 'required',
+            ));
+            if($validator->fails()){
+                $res = array('error'=>$validator->messages()->all());
+                return $this->returnError(405,'Fail Validate!', $res);
+            }
+
+            $user = User::where('Email', $request->Email)->first();
+            if($user){
+                return $this->returnError(406, 'Email already exists!');
+            }else{
+                $user = new User();
+                $user->Email = $request->Email;
+                $user->fb_id = $request->FB_id;
+                $jobseeker = new JobSeeker();
+            }
+            if($user->save()){
+                $jobseeker->user_id = $user->id;
+                $jobseeker->Avatar = $request->Avatar;
+                $jobseeker->FullName = $request->FullName;
+                $jobseeker->IsActive = 1;
+                $jobseeker->save();
+                Auth::login($user);
+                return $this->returnJSON(200, 'Register and Login success !', Auth::user());
+            }else{
+                return $this->returnError(404, 'Register Failse!');
+            }
+        }
+    }
+
+    // udpate seeker
+
+    public function postUpdateJobSeeker(Request $request) {
+        $user = Auth::user();
+        if($user->IsCompany == 0) {
+            $result = $this->jobSeeker->update($user->jobSeeker->id, $request->all());
+            if($result) {
+                return $this->returnSuccess('Register Success!');
+            }else{
+                return $this->returnError(404, 'Register Failse 1!');
+            }
+        }else{
+            return $this->returnError(404, 'Failse !');
+        }
+    }
+
+}

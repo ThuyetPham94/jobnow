@@ -1,0 +1,122 @@
+input[type='checkbox'] {
+    display: none;
+}
+label span.m-check {/* <-- style the artificial checkbox */
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    border: 1px solid grey;
+    display: inline-block;
+    position: relative;
+}
+input[type='checkbox']:checked + span.m-check:before {/* <-- style its checked state..with a ticked icon */
+    content: '\2714';
+    position: absolute;
+    background: #4584da;
+    color: white;
+    width: 100%;
+    height: 100%;
+}
+.checkbox label{
+    font-family: Lato;
+    font-size: 13px;
+    color: #656464;;
+    font-weight: bold;
+    padding-bottom: 7px;
+}
+span.salary {
+    font-weight: bold;
+    font-size: 14px;
+}
+p.note{
+    color: #aaaaaa;
+    font-style: italic;
+}
+.bootstrap-tagsinput {
+    width:100%;
+    border-radius:2px;
+    height :38px;
+}
+.post-job .form-control{
+    border-radius: 0px;
+    min-height: 38px;
+    border-radius:2px;
+}
+.clear-padding{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.post-job .form-group > label > span{
+    color: red;
+}
+.company-detail{
+    margin-top: 20px;
+}
+.save-continue{
+    color: white;
+    font-size: 20px;
+    font-family: Lato;
+    font-weight: bold;
+    background: #ff8745; /* Old browsers */
+    background: -moz-linear-gradient(top,  #ff8745 0%, #fa603c 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #ff8745 0%,#fa603c 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #ff8745 0%,#fa603c 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff8745', endColorstr='#fa603c',GradientType=0 ); /* IE6-9 */
+    padding-left: 30px;
+    padding-right: 30px;
+
+}
+.save-continue:hover, .save-draft:hover{
+    color: white;
+}
+.save-draft{
+    color: white;
+    font-size: 20px;
+    font-family: Lato;
+    font-weight: bold;
+    background: #888787;
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-right: 20px;
+}
+.save-button {
+    text-align: center;
+    padding-top: 30px;
+    padding-bottom: 50px;
+}
+.reset-button{
+    color: white;
+    font-size: 20px;
+    font-family: Lato;
+    font-weight: bold;
+    background: #888787;
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-right: 20px;
+}
+
+.search-button{
+    color: white;
+    font-size: 20px;
+    font-family: Lato;
+    font-weight: bold;
+    background: #ff8745; /* Old browsers */
+    background: -moz-linear-gradient(top,  #ff8745 0%, #fa603c 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #ff8745 0%,#fa603c 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #ff8745 0%,#fa603c 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff8745', endColorstr='#fa603c',GradientType=0 ); /* IE6-9 */
+    padding-left: 30px;
+    padding-right: 30px;
+
+}
+.search-button {
+    text-align: center;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+.jobnow{
+    color: #288ccb;
+}
+.data-search{
+    margin-top: 20px;
+}
